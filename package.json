@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.18",
+    "tailwindcss": "^4.3.2"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^10.0.0",
+    "lucide-react": "^1.24.0",
+    "react-router-dom": "^7.18.1"
+  }
+}

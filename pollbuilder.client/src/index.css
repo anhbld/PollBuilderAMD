@@ -1,0 +1,102 @@
+/* src/index.css */
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+    padding: 24px;
+}
+
+/* Global Card Styling */
+.bg-white {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Headings */
+h2 {
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 14px;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+/* Interactive elements */
+button {
+    background-color: #0f172a;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    button:hover {
+        background-color: #1e293b;
+    }
+
+    button.border-red-200 {
+        background-color: transparent;
+        border: 1px solid #fca5a5;
+        color: #dc2626;
+    }
+
+        button.border-red-200:hover {
+            background-color: #fef2f2;
+        }
+
+input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+    input:focus {
+        outline: 2px solid #6366f1;
+    }
+
+/* Flex Utilities */
+.flex {
+    display: flex;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+/* Status Badges */
+.bg-emerald-100 {
+    background-color: #d1fae5;
+    color: #065f46;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+}
