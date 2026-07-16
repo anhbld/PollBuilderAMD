@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import PollCreator from './components/PollCreator';
-import PollVoter from './components/PollVoter';
-import PollResults from './components/PollResults';
+// 🟢 Update these lines to use capital "Components"
+import PollCreator from './Components/PollCreator';
+import PollVoter from './Components/PollVoter';
+import PollResults from './Components/PollResults';
 
 function App() {
     return (

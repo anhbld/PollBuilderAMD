@@ -139,9 +139,9 @@ namespace PollBuilder.API.Controllers
 
             // 1. Get raw vote counts grouped by their index straight from the DB
             var voteCounts = await _context.Votes
-                .Where(v => v.PollCode == code)
+                .Where(v => v.PollCode == code && v.OptionIndex != null) // 🟢 Add this filter!
                 .GroupBy(v => v.OptionIndex)
-                .Select(g => new { OptionIndex = g.Key, Count = g.Count() })
+                .Select(g => new { OptionIndex = g.Key!.Value, Count = g.Count() }) // 🟢 Cast it to a non-nullable int
                 .ToDictionaryAsync(x => x.OptionIndex, x => x.Count);
 
             // 2. Safely map options in memory using the local dictionary

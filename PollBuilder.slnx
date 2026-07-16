@@ -1,8 +1,8 @@
 <Solution>
-  <Project Path="PollBuilder.Client/PollBuilder.Client.esproj" DisplayName="pollbuilder.client">
+  <Project Path="PollBuilder.API/PollBuilder.API.csproj" />
+  <Project Path="PollBuilder.Client/PollBuilder.Client.esproj">
     <Build />
     <Deploy />
   </Project>
   <Project Path="PollBuilder.Tests/PollBuilder.Tests.csproj" Id="1892e172-5917-4fb0-9679-9b436ab18f1b" />
-  <Project Path="PollBuilder/PollBuilder.API.csproj" />
 </Solution>

@@ -1,0 +1,35 @@
+services:
+  pollbuilder-api:
+    image: pollbuilder-api
+    build:
+      context: .
+      dockerfile: PollBuilder.API/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80;https://+:443 
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal,1433;Database=PollBuilderDb;User Id=sa;Password=YourSecurePassword123!;TrustServerCertificate=True;Connect Timeout=30;ConnectRetryCount=5;ConnectRetryInterval=10;
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - pollbuilder-network
+
+  pollbuilder-client:
+    image: pollbuilder-client
+    build:
+      context: .
+      dockerfile: PollBuilder.Client/Dockerfile
+      args:
+        # 🟢 UPDATED: Pointing to the internal service name within the Docker network
+        - "VITE_API_URL=http://pollbuilder-api:8080"
+    ports:
+      - "3000:80" 
+    depends_on:
+      - pollbuilder-api
+    networks:
+      - pollbuilder-network
+
+networks:
+  pollbuilder-network:
+    driver: bridge

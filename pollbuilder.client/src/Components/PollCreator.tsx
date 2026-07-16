@@ -1,22 +1,39 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function PollCreator() {
     const [question, setQuestion] = useState('');
-    const [type, setType] = useState(0); // 0=MCQ, 1=YesNo, 2=Rating, 3=OpenText
+    const [type, setType] = useState(0);
     const [options, setOptions] = useState(['', '']);
     const [expiryMinutes, setExpiryMinutes] = useState('');
     const [createdLink, setCreatedLink] = useState('');
+    const [copied, setCopied] = useState(false);
+
+    // 🟢 UPDATED: Uses the environment variable defined in your docker-compose.yml
+    const apiBase = "http://localhost:5000";
 
     const handleAddOption = () => setOptions([...options, '']);
     const handleRemoveOption = (index: number) => setOptions(options.filter((_, i) => i !== index));
+
+    const handleCopyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(createdLink);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy link: ', err);
+        }
+    };
 
     const handleCreate = async () => {
         const expiresAt = expiryMinutes ? new Date(Date.now() + parseInt(expiryMinutes) * 60000).toISOString() : null;
         const filteredOptions = type === 0 ? options.filter(o => o.trim() !== '') : [];
 
-        const res = await fetch('https://localhost:7168/api/polls', {
+        // 🟢 REMOVED: ngrok-skip-browser-warning header
+        const res = await fetch(`${apiBase}/api/polls`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({ question, type, options: filteredOptions, expiresAt })
         });
 
@@ -68,9 +85,25 @@ export default function PollCreator() {
             <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition" onClick={handleCreate}>Build Live Poll</button>
 
             {createdLink && (
-                <div className="p-4 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Poll Ready!</p>
-                    <a className="block text-sm font-mono break-all underline text-indigo-600" href={createdLink} target="_blank" rel="noreferrer">{createdLink}</a>
+                <div className="p-4 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg space-y-3">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Poll Ready!</p>
+                        <p className="text-xs text-slate-500">Share this link with your audience:</p>
+                    </div>
+                    <div className="flex gap-2 items-center bg-white p-2 rounded-lg border border-slate-200">
+                        <input
+                            type="text"
+                            readOnly
+                            value={createdLink}
+                            className="flex-1 text-sm font-mono bg-transparent outline-none text-indigo-600 truncate"
+                        />
+                        <button
+                            onClick={handleCopyLink}
+                            className={`px-3 py-1 rounded text-xs font-semibold transition ${copied ? 'bg-emerald-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                        >
+                            {copied ? '✓ Copied!' : 'Copy Link'}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

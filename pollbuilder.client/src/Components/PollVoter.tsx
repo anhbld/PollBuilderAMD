@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 export default function PollVoter() {
@@ -9,7 +9,9 @@ export default function PollVoter() {
     const [textVal, setTextVal] = useState('');
     const [err, setErr] = useState('');
 
-    // Local storage token serves as a lightweight device fingerprint
+    // 🟢 UPDATED: Use the environment variable defined in your Docker setup
+    const apiBase = "http://localhost:5000";
+
     const getVoterToken = () => {
         let token = localStorage.getItem('voter_fingerprint');
         if (!token) {
@@ -20,16 +22,23 @@ export default function PollVoter() {
     };
 
     useEffect(() => {
-        fetch(`https://localhost:7168/api/polls/${code}`)
-            .then(res => res.json())
+        // 🟢 REMOVED: ngrok headers
+        fetch(`${apiBase}/api/polls/${code}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Poll not found");
+                return res.json();
+            })
             .then(data => setPoll(data))
             .catch(() => setErr('Poll not found.'));
-    }, [code]);
+    }, [code, apiBase]);
 
     const handleSubmitVote = async () => {
-        const res = await fetch(`https://localhost:7168/api/polls/${code}/vote`, {
+        const res = await fetch(`${apiBase}/api/polls/${code}/vote`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json'
+                // 🟢 REMOVED: ngrok header
+            },
             body: JSON.stringify({
                 optionIndex: poll.type === 2 ? selectedOpt : selectedOpt,
                 textResponse: poll.type === 3 ? textVal : '',

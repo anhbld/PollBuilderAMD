@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
@@ -7,49 +7,50 @@ export default function PollResults() {
     const [results, setResults] = useState<any>(null);
     const [liveQuestion, setLiveQuestion] = useState('');
 
+    // 🟢 Uses the VITE_API_URL set in your docker-compose.yml
+    const apiBase = "http://localhost:5000";
+
     useEffect(() => {
-        // Initial data hydration fetch
-        fetch(`https://localhost:7168/api/polls/${code}/results`)
+        // 🟢 Replaced ngrok URL with dynamic apiBase
+        fetch(`${apiBase}/api/polls/${code}/results`)
             .then(res => res.json())
             .then(data => setResults(data));
 
-        // Connect to WebSocket via SignalR
+        // 🟢 Simplified Hub connection; standard negotiation works best in local/Docker networks
         const connection = new HubConnectionBuilder()
-            .withUrl('https://localhost:7168/hubs/poll')
+            .withUrl(`${apiBase}/hubs/poll`)
             .withAutomaticReconnect()
             .build();
 
         connection.start()
             .then(() => {
-                // 🟢 Only invoke if the connection successfully opened
                 if (connection.state === "Connected") {
                     connection.invoke('JoinPollRoom', code)
-                        .catch(err => console.error("Error joining room:", err));
+                        .catch((err: any) => console.error("Error joining room:", err));
                 }
             })
-            .catch(err => console.error('Connection structural crash: ', err));
+            .catch((err: any) => console.error('Connection failed: ', err));
 
         connection.on('BroadcastUpdate', (updatedSummary: any) => {
             setResults(updatedSummary);
         });
 
         return () => {
-            // 🟢 Safely leave only if we are actively connected
             if (connection.state === "Connected") {
-                connection.invoke('LeavePollRoom', code).catch(e => { });
+                connection.invoke('LeavePollRoom', code).catch(() => { });
             }
             connection.off('BroadcastUpdate');
             connection.stop();
         };
-    }, [code]);
+    }, [code, apiBase]);
 
     const handleForceClose = async () => {
-        await fetch(`https://localhost:7168/api/polls/${code}/close`, { method: 'POST' });
+        await fetch(`${apiBase}/api/polls/${code}/close`, { method: 'POST' });
     };
 
     const handleSendQuestion = async () => {
         if (!liveQuestion.trim()) return;
-        await fetch(`https://localhost:7168/api/polls/${code}/questions`, {
+        await fetch(`${apiBase}/api/polls/${code}/questions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ content: liveQuestion })
@@ -59,10 +60,15 @@ export default function PollResults() {
 
     if (!results) return <div className="text-center p-8 text-slate-400">Loading live socket data stream...</div>;
 
-    const totalVotes = results.distribution.reduce((acc: number, item: any) => acc + item.count, 0);
+    // 🟢 Defensive Coding: Fallback to empty array if properties are missing
+    const distribution = results.distribution || [];
+    const questions = results.questions || [];
+    const openTextResponses = results.openTextResponses || [];
+
+    const totalVotes = distribution.reduce((acc: number, item: any) => acc + (item.count || 0), 0);
 
     return (
-        <div className="space-y-6 max-w-xl mx-auto">
+        <div className="space-y-6 max-w-xl mx-auto text-slate-800">
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <div className="flex justify-between items-start">
                     <h2 className="text-xl font-bold text-slate-800">{results.question}</h2>
@@ -73,15 +79,13 @@ export default function PollResults() {
                     )}
                 </div>
 
-                {/* Dynamic bar charts with smooth animated inline CSS widths */}
                 {results.type !== 3 && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', margin: '16px 0' }}>
-                        {results.distribution.map((item: any, i: number) => {
-                            const pct = totalVotes > 0 ? Math.round((item.count / totalVotes) * 100) : 0;
+                        {distribution.map((item: any, i: number) => {
+                            const count = item.count || 0;
+                            const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
                             return (
                                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-
-                                    {/* 🟢 FIXED: Native CSS Flexbox splitting the elements to opposite sides */}
                                     <div style={{
                                         display: 'flex',
                                         justifyContent: 'space-between',
@@ -90,16 +94,12 @@ export default function PollResults() {
                                         fontWeight: '600',
                                         color: '#334155'
                                     }}>
-                                        <span>{item.optionText || item.option}</span>
-                                        <span style={{ color: '#6366f1' }}>{item.count} votes ({pct}%)</span>
+                                        <span>{item.optionText || item.option || `Option ${i + 1}`}</span>
+                                        <span style={{ color: '#6366f1' }}>{count} votes ({pct}%)</span>
                                     </div>
-
-                                    {/* Progress Bar background track */}
                                     <div style={{ width: '100%', backgroundColor: '#f1f5f9', height: '24px', borderRadius: '6px', overflow: 'hidden', position: 'relative' }}>
-                                        {/* Dynamic filled area */}
                                         <div style={{ backgroundColor: '#6366f1', height: '100%', width: `${pct}%`, transition: 'width 0.5s ease-out' }} />
                                     </div>
-
                                 </div>
                             );
                         })}
@@ -108,9 +108,9 @@ export default function PollResults() {
 
                 {results.type === 3 && (
                     <div className="space-y-2">
-                        <h3 className="text-sm font-bold text-slate-700">Open-Ended Responses ({results.openTextResponses.length})</h3>
+                        <h3 className="text-sm font-bold text-slate-700">Open-Ended Responses ({openTextResponses.length})</h3>
                         <div className="max-h-60 overflow-y-auto space-y-1.5 pr-1">
-                            {results.openTextResponses.map((txt: string, i: number) => (
+                            {openTextResponses.map((txt: string, i: number) => (
                                 <div key={i} className="bg-slate-50 border p-2.5 text-xs rounded-lg text-slate-700 font-mono">{txt}</div>
                             ))}
                         </div>
@@ -124,21 +124,20 @@ export default function PollResults() {
                 )}
             </div>
 
-            {/* Anonymous Interactive Stream Component (Distinction Layer) */}
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-800">Audience Live Q&A Stream</h3>
                 <div className="flex gap-2">
-                    <input className="flex-1 px-3 py-1.5 text-xs border rounded-lg focus:outline-indigo-500" value={liveQuestion} onChange={e => setLiveQuestion(e.target.value)} placeholder="Submit an anonymous question to the screen..." />
+                    <input className="flex-1 px-3 py-1.5 text-xs border rounded-lg focus:outline-indigo-500 bg-white text-slate-900" value={liveQuestion} onChange={e => setLiveQuestion(e.target.value)} placeholder="Submit an anonymous question to the screen..." />
                     <button className="bg-slate-900 text-white text-xs px-4 py-1.5 rounded-lg font-medium hover:bg-slate-800" onClick={handleSendQuestion}>Submit</button>
                 </div>
 
                 <div className="space-y-2">
-                    {results.questions.map((q: any) => (
-                        <div key={q.id} className={`p-3 rounded-lg border flex justify-between items-center text-xs ${q.isPinned ? 'bg-amber-50 border-amber-300' : 'bg-slate-50'}`}>
-                            <span className="font-medium text-slate-700">{q.content}</span>
+                    {questions.map((q: any, i: number) => (
+                        <div key={q.id || q.Id || i} className={`p-3 rounded-lg border flex justify-between items-center text-xs ${q.isPinned || q.IsPinned ? 'bg-amber-50 border-amber-300' : 'bg-slate-50'}`}>
+                            <span className="font-medium text-slate-700">{q.content || q.Content}</span>
                             <div className="flex items-center gap-2">
-                                {q.isPinned && <span className="text-amber-600 font-bold text-[10px] uppercase tracking-wider">Pinned</span>}
-                                <span className="bg-white border px-2 py-0.5 rounded text-slate-500">▲ {q.upvotes}</span>
+                                {(q.isPinned || q.IsPinned) && <span className="text-amber-600 font-bold text-[10px] uppercase tracking-wider">Pinned</span>}
+                                <span className="bg-white border px-2 py-0.5 rounded text-slate-500">▲ {q.upvotes ?? q.Upvotes ?? 0}</span>
                             </div>
                         </div>
                     ))}
