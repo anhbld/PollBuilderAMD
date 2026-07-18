@@ -48,6 +48,8 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<PollHub>("/hubs/poll");
 
+app.MapGet("/", () => "PollBuilder API is running");
+
 // 6. Automatically apply EF Core migrations
 using (var scope = app.Services.CreateScope())
 {
