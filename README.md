@@ -22,6 +22,7 @@ The containers will automatically start the frontend, backend, and database.
 To stop the application:
 
 docker compose down
+
 3. Running Without Docker
 Backend
 
