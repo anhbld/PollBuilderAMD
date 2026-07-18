@@ -45,7 +45,7 @@ export default function PollCreator() {
 
     return (
         <div className="max-w-lg mx-auto bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
-            <h2 className="text-xl font-bold text-slate-800">Create a New Live Poll</h2>
+            <h2 className="text-xl font-bold text-slate-800">Create a New Live Poll For The Demo</h2>
 
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Question</label>
@@ -82,7 +82,7 @@ export default function PollCreator() {
                 <input type="number" className="w-full px-3 py-2 border rounded-lg" value={expiryMinutes} onChange={e => setExpiryMinutes(e.target.value)} placeholder="Never expires" />
             </div>
 
-            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition" onClick={handleCreate}>Build Live Poll For Demo</button>
+            <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition" onClick={handleCreate}>Build Live Poll</button>
 
             {createdLink && (
                 <div className="p-4 bg-emerald-50 text-emerald-900 border border-emerald-200 rounded-lg space-y-3">
