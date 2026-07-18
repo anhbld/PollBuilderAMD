@@ -36,10 +36,10 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build Docker image
-      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pollbuilder-api:latest ./PollBuilder.API
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/pollbuilder:latest ./PollBuilder.API
 
     - name: Push Docker image
-      run: docker push ${{ secrets.DOCKER_USERNAME }}/pollbuilder-api:latest
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/pollbuilder:latest
 
     - name: Deploy to Render
       run: curl "$RENDER_DEPLOY_HOOK"
