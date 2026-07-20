@@ -45,7 +45,7 @@ export default function PollCreator() {
 
     return (
         <div className="max-w-lg mx-auto bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-5">
-            <h2 className="text-xl font-bold text-slate-800">Create a New Live Poll</h2>
+            <h2 className="text-xl font-bold text-slate-800">Create a New Live Poll For Testing</h2>
 
             <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Question</label>
